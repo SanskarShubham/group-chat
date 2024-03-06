@@ -31,6 +31,7 @@ app.use(express.json());
 const expenseRoutes = require('./routes/expense');
 const userRoutes = require('./routes/user');
 const membershipRoutes = require('./routes/membership');
+const chatRoutes = require('./routes/chat');
 
 // DATABASE and MODEL   IMPORT
 const sequelize = require('./util/database');
@@ -38,6 +39,7 @@ const User = require('./models/user');
 const Forgotpassword = require('./models/forgotPassword');
 const Expense = require('./models/expense');
 const Order = require('./models/order');
+const Chat = require('./models/chat');
 
 
 
@@ -47,6 +49,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ROUTES
 app.use('/api', expenseRoutes);
+app.use('/api', chatRoutes);
 app.use('/api', userRoutes);
 app.use('/api', membershipRoutes);
 
@@ -62,6 +65,9 @@ Order.belongsTo(User);
 
 User.hasMany(Forgotpassword); 
 Forgotpassword.belongsTo(User);
+
+User.hasMany(Chat);
+Chat.belongsTo(User);
 
 //   sequelize.sync({force:true})
  sequelize.sync()

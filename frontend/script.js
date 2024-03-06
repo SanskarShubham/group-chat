@@ -1,12 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (isUserLoggedIN()) {
-    displayExpenses();
+    setInterval(displayChats, 2000); 
+    // displayChats();
   }
 });
 // http://34.207.185.225:3000/api/expenses
 // const baseUrl = "https://34.207.185.225:3000/api/";
 const baseUrl = "http://localhost:3000/api/";
 
+const chatInput = document.getElementById('message-input');
+const chatContainer = document.getElementById('chat-container');
 const amountInput = document.getElementById('amount');
 const descriptionInput = document.getElementById('description');
 const categoryInput = document.getElementById('category');
@@ -73,7 +76,52 @@ function addExpense() {
   displayExpenses();
 }
 
+async function addChat(e) {
 
+  try {
+    e.preventDefault();
+    const chatVal = chatInput.value.trim();
+    const newMessage = {
+      message: chatVal,
+    };
+    // add to server
+    await axios.post(baseUrl + 'add-chat', newMessage, { headers: { Authorization: getToken() } })
+
+    chatInput.value = '';
+    displayChats();
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+
+async function displayChats() {
+
+  try {
+
+    checkPremium();
+    const res = await axios.get(baseUrl + `chats`, { headers: { "Authorization": getToken() } })
+    const chats = res.data.chats;
+    console.log(chats);
+
+    chatContainer.innerHTML = '';
+
+    chats.forEach((chat) => {
+      const div = document.createElement('div');
+      // Set the class attribute with all the classes
+      div.setAttribute("class", "message bg-light p-2 mb-2");
+      div.innerHTML = `${chat.user.name}:  ${chat.message}`;
+      chatContainer.appendChild(div);
+    });
+    createPagination(res.data, pageNo);
+
+  } catch (error) {
+    // alert("please start your backend server. ")
+    console.log(error);
+  }
+
+
+}
 async function displayExpenses() {
 
   try {
@@ -83,14 +131,14 @@ async function displayExpenses() {
     const searchParams = new URLSearchParams(new URL(currentUrl).search);
     // Get individual query parameters using the get() method
     const pageNo = searchParams.get('page') || 1;
-      let rowPerPage =  localStorage.getItem('rowsPerPage')
+    let rowPerPage = localStorage.getItem('rowsPerPage')
     if (rowPerPage) {
-        rowPerPage  =parseInt(rowPerPage);
-    }else{
+      rowPerPage = parseInt(rowPerPage);
+    } else {
       rowPerPage = 5;
-    }    
+    }
     console.log(rowPerPage);
-     rowsPerPageElement.value =rowPerPage;
+    rowsPerPageElement.value = rowPerPage;
 
     const expenseList = document.getElementById('expenseList');
     const res = await axios.get(baseUrl + `expenses?page=${pageNo}&rowPerPage=${rowPerPage}`, { headers: { "Authorization": getToken() } })
@@ -206,7 +254,7 @@ async function login(e) {
       alert("user logged in successfully.")
 
       // Similar behavior as an HTTP redirect
-      window.location.replace(`${window.location.origin}/frontend/expense.html`);
+      window.location.replace(`${window.location.origin}/frontend/chat.html`);
     }
   } catch (error) {
     console.log(error);
@@ -355,7 +403,7 @@ async function showLeaderboard() {
 
     const users = await axios.get(baseUrl + 'premium/get-leaderboard', { headers: { "Authorization": getToken() } })
     const usersData = users.data;
-  
+
 
     leaderBoard.innerHTML = '';
 
@@ -408,36 +456,36 @@ function parseJwt(token) {
 
 function createPagination(res, pgNo) {
   paginationElement.innerHTML = ''; // Clear previous pagination
-  if (res.lastPage > 1 ) {
-    
- 
-  for (let i = 1; i <= res.lastPage; i++) {
-    const li = document.createElement('li');
-    li.classList.add('page-item');
+  if (res.lastPage > 1) {
 
-    if (i == pgNo) {
-      li.classList.add('active');
+
+    for (let i = 1; i <= res.lastPage; i++) {
+      const li = document.createElement('li');
+      li.classList.add('page-item');
+
+      if (i == pgNo) {
+        li.classList.add('active');
+      }
+      const link = document.createElement('a');
+      link.classList.add('page-link');
+      link.href = `?page=${i}`;
+      link.textContent = i;
+
+      li.appendChild(link);
+      paginationElement.appendChild(li);
     }
-    const link = document.createElement('a');
-    link.classList.add('page-link');
-    link.href = `?page=${i}`;
-    link.textContent = i;
-
-    li.appendChild(link);
-    paginationElement.appendChild(li);
   }
 }
-}
 
 
-if(rowsPerPageElement){
-// Add onchange event listener
-rowsPerPageElement.addEventListener('change', function () {
-  // Get the selected value
-  const selectedValue = rowsPerPageElement.value;
+if (rowsPerPageElement) {
+  // Add onchange event listener
+  rowsPerPageElement.addEventListener('change', function () {
+    // Get the selected value
+    const selectedValue = rowsPerPageElement.value;
 
-  // Save the selected value to localStorage
-  localStorage.setItem('rowsPerPage', selectedValue);
-  location.reload();
-});
+    // Save the selected value to localStorage
+    localStorage.setItem('rowsPerPage', selectedValue);
+    location.reload();
+  });
 }
