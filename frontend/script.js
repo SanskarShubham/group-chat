@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (isUserLoggedIN()) {
-    setInterval(displayChats, 2000); 
-    // displayChats();
+    setInterval(displayChats, 5000); 
+     displayChats();
   }
 });
 // http://34.207.185.225:3000/api/expenses
@@ -102,7 +102,7 @@ async function displayChats() {
     checkPremium();
     const res = await axios.get(baseUrl + `chats`, { headers: { "Authorization": getToken() } })
     const chats = res.data.chats;
-    console.log(chats);
+    // console.log(chats);
 
     chatContainer.innerHTML = '';
 
@@ -113,7 +113,6 @@ async function displayChats() {
       div.innerHTML = `${chat.user.name}:  ${chat.message}`;
       chatContainer.appendChild(div);
     });
-    createPagination(res.data, pageNo);
 
   } catch (error) {
     // alert("please start your backend server. ")
@@ -152,7 +151,7 @@ async function displayExpenses() {
       li.innerHTML = `<strong>${expense.description}</strong> - $${expense.amount.toFixed(2)} (${expense.category}) <button onclick="editExpense(${expense.id},event)" class="btn btn-sm btn-outline-success">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id})">Delete</button>`;
       expenseList.appendChild(li);
     });
-    createPagination(res.data, pageNo);
+     createPagination(res.data, pageNo);
 
   } catch (error) {
     // alert("please start your backend server. ")
