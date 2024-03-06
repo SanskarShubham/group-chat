@@ -19,7 +19,9 @@ const accessLogStream = fs.createWriteStream(path.join(__dirname,'access.log'),{
 app.use(morgan('combined',{stream:accessLogStream}));
 app.use(compression());
 app.use(helmet());
-app.use(cors())
+app.use(cors({
+    "origin":"http://127.0.0.1:5500"
+}))
 app.use(express.json());
 
 // app.set('view engine', 'ejs');

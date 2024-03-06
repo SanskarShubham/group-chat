@@ -101,13 +101,13 @@ async function displayExpenses() {
     expenses.forEach((expense) => {
       const li = document.createElement('li');
       li.classList.add("list-group-item");
-      li.innerHTML = `<strong>${expense.description}</strong> - $${expense.amount.toFixed(2)} (${expense.category}) <button onclick="editExpense(${expense.id},event)" class="btn btn-sm btn-success">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id})">Delete</button>`;
+      li.innerHTML = `<strong>${expense.description}</strong> - $${expense.amount.toFixed(2)} (${expense.category}) <button onclick="editExpense(${expense.id},event)" class="btn btn-sm btn-outline-success">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id})">Delete</button>`;
       expenseList.appendChild(li);
     });
     createPagination(res.data, pageNo);
 
   } catch (error) {
-    alert("please start your backend server. ")
+    // alert("please start your backend server. ")
     console.log(error);
   }
 
@@ -304,16 +304,16 @@ function showPremium() {
   accountDiv.innerHTML = `
   <ul class="navbar-nav me-auto mb-2 mb-lg-0">
   <li class="nav-item">
-  <button type="button" onclick="downloadReport()" class="btn btn-sm btn-success mx-2">Download Report</button>
+  <button type="button" onclick="downloadReport()" class="btn btn-sm btn-outline-success mx-2">Download Report</button>
   </li>
     <li class="nav-item">
-    <button type="button" onclick="showLeaderboard()" class="btn btn-sm btn-success mx-2">Leader board</button>
+    <button type="button" onclick="showLeaderboard()" class="btn btn-sm btn-outline-success mx-2">Leader board</button>
   </li> 
    <li class="nav-item">
-   <button type="button" disabled class="btn btn-sm btn-outline-success">You are a Premium user.</button>
+   <button type="button" disabled class="btn btn-sm btn-outline-outline-success">You are a Premium user.</button>
   </li> 
   <li class="nav-item">
-  <a onclick="signout()" class="btn btn-sm btn-success mx-2">Logout</a>
+  <a onclick="signout()" class="btn btn-sm btn-outline-success mx-2">Logout</a>
   </li>
 
 </ul>` ;
@@ -327,7 +327,8 @@ function checkPremium() {
     if (token.isPremium) {
       showPremium();
     } else {
-      accountDiv.innerHTML = `<button onclick="buyMembership()" class="btn btn-sm btn-success">Buy Membership</button><a onclick="signout()" class="btn btn-sm btn-success mx-2">Logout</a>`;
+      // <button onclick="buyMembership()" class="btn btn-sm btn-outline-success">Buy Membership</button>
+      accountDiv.innerHTML = `<a onclick="signout()" class="btn btn-sm btn-outline-success mx-2">Logout</a>`;
     }
   }
 
