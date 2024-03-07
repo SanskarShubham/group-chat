@@ -27,3 +27,21 @@ div,
 #message-input {
     resize: none;
 }
+
+.message-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: self-end; /* Align timestamp to the baseline of the message */
+    background-color: #f8f9fa !important;
+    margin-bottom: 10px; /* Adjust margin as needed */
+}
+
+.message {
+    flex: 1; /* Allow message to grow to fill available space */
+}
+
+.message-time {
+    margin-right: 0.5rem;
+    color: #5e666d;
+    font-size: 1.0rem;
+}

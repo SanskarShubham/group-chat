@@ -48,20 +48,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ROUTES
-app.use('/api', expenseRoutes);
+// app.use('/api', expenseRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', userRoutes);
-app.use('/api', membershipRoutes);
+// app.use('/api', membershipRoutes);
 
 app.use((req,res)=>{
     res.sendFile(path.join(__dirname,'frontend',req.url));
 })
 //  ASSOCIATION
-User.hasMany(Expense);
-Expense.belongsTo(User);
+// User.hasMany(Expense);
+// Expense.belongsTo(User);
  
-User.hasMany(Order);
-Order.belongsTo(User);
+// User.hasMany(Order);
+// Order.belongsTo(User);
 
 User.hasMany(Forgotpassword); 
 Forgotpassword.belongsTo(User);

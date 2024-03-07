@@ -135,8 +135,10 @@ async function displayChats() {
     localChats.forEach((chat) => {
       const div = document.createElement('div');
       // Set the class attribute with all the classes
-      div.setAttribute("class", "message bg-light p-2 mb-2");
-      div.innerHTML = `${chat.user.name}:  ${chat.message}`;
+      div.setAttribute("class", "message-container");
+      div.innerHTML = `
+      <div class="message bg-light p-2 mb-2">${chat.user.name}:  ${chat.message}</div>
+      <div class="message-time">12:34 PM</div>`;
       chatContainer.appendChild(div);
     });
 
