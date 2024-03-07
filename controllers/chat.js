@@ -1,6 +1,7 @@
 const Chat = require('../models/chat');
 const User = require('../models/user');
 const sequelize = require('../util/database');
+const {Op} = require('sequelize');
 
 exports.postAddChat = async (req, res, next) => {
   let transaction;
@@ -98,7 +99,7 @@ exports.postDeleteChat = async (req, res, next) => {
 
 exports.getChats = async (req, res, next) => {
   try {
-    // const pageNo = req.query.page || 1;
+    const lastChatId = req.query.lastChatId || 0;
     // const ITEM_PER_PAGE = parseInt(req.query.rowPerPage || 5);
     // console.log(ITEM_PER_PAGE);
     const chats = await Chat.findAll({
@@ -106,7 +107,13 @@ exports.getChats = async (req, res, next) => {
         model: User,
         attributes: ['name'] // Specify the attributes you want to retrieve from the User model
       }],
-      attributes: ['message'] // Specify the attributes you want to retrieve from the Chat model
+      attributes: ['id','message'],
+      where: {
+        id: {
+          [Op.gt]: lastChatId,
+        },
+      },
+       // Specify the attributes you want to retrieve from the Chat model
     })
 
     // {

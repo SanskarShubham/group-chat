@@ -1,9 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
-  if (isUserLoggedIN()) {
-    setInterval(displayChats, 5000); 
-     displayChats();
-  }
-});
+
 // http://34.207.185.225:3000/api/expenses
 // const baseUrl = "https://34.207.185.225:3000/api/";
 const baseUrl = "http://localhost:3000/api/";
@@ -88,7 +83,8 @@ async function addChat(e) {
     await axios.post(baseUrl + 'add-chat', newMessage, { headers: { Authorization: getToken() } })
 
     chatInput.value = '';
-    displayChats();
+    await displayChats();
+    scrollToBottom();
   } catch (err) {
     console.log(err)
   }
@@ -99,20 +95,51 @@ async function displayChats() {
 
   try {
 
-    checkPremium();
-    const res = await axios.get(baseUrl + `chats`, { headers: { "Authorization": getToken() } })
+    let localChats;
+    let lastChatId;
+    let LastIndex;
+    const localChatsString = localStorage.getItem('chats');
+    if (localChatsString) {
+
+      localChats = JSON.parse(localChatsString);
+      LastIndex = localChats.length - 1;
+      if (LastIndex > 50) {
+        localChats = localChats.filter((chat, index) => index > 25);
+        LastIndex = localChats.length - 1;
+      }
+
+      lastChatId = localChats[LastIndex]['id'];
+
+    } else {
+      lastChatId = 0;
+    }
+
+    // checkPremium();
+    const res = await axios.get(baseUrl + `chats?lastChatId=${lastChatId}`, { headers: { "Authorization": getToken() } })
+
+
     const chats = res.data.chats;
+
     // console.log(chats);
+    if (chats.length > 0) {
+
+      if (localChatsString) {
+        localChats = [...localChats, ...chats];
+      } else {
+        localChats = chats
+      }
+      localStorage.setItem('chats', JSON.stringify(localChats));
+    }
 
     chatContainer.innerHTML = '';
-
-    chats.forEach((chat) => {
+    localChats.forEach((chat) => {
       const div = document.createElement('div');
       // Set the class attribute with all the classes
       div.setAttribute("class", "message bg-light p-2 mb-2");
       div.innerHTML = `${chat.user.name}:  ${chat.message}`;
       chatContainer.appendChild(div);
     });
+
 
   } catch (error) {
     // alert("please start your backend server. ")
@@ -151,7 +178,7 @@ async function displayExpenses() {
       li.innerHTML = `<strong>${expense.description}</strong> - $${expense.amount.toFixed(2)} (${expense.category}) <button onclick="editExpense(${expense.id},event)" class="btn btn-sm btn-outline-success">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id})">Delete</button>`;
       expenseList.appendChild(li);
     });
-     createPagination(res.data, pageNo);
+    createPagination(res.data, pageNo);
 
   } catch (error) {
     // alert("please start your backend server. ")
@@ -488,3 +515,15 @@ if (rowsPerPageElement) {
     location.reload();
   });
 }
+function scrollToBottom() {
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+document.addEventListener('DOMContentLoaded', async () => {
+  if (isUserLoggedIN()) {
+    setInterval(displayChats, 5000);
+    await displayChats()
+    scrollToBottom();
+
+  }
+
+});
