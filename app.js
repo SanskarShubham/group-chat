@@ -28,6 +28,7 @@ app.use(express.json());
 
 const userRoutes = require('./routes/user');
 const chatRoutes = require('./routes/chat');
+const groupRoutes = require('./routes/group');
 
 // DATABASE and MODEL   IMPORT
 const sequelize = require('./util/database');
@@ -45,6 +46,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/api', expenseRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', userRoutes);
+app.use('/api', groupRoutes);
 // app.use('/api', membershipRoutes);
 
 app.use((req,res)=>{
@@ -59,9 +61,10 @@ Forgotpassword.belongsTo(User);
 User.hasMany(Chat);
 Chat.belongsTo(User);
 
-// Group.hasMany(User);
+
 User.hasMany(Group);
 Group.belongsToMany(User, { through: GroupUsers })
+User.belongsToMany(Group, { through: GroupUsers });
 
 Group.hasMany(Chat);
 

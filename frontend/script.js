@@ -20,56 +20,10 @@ const paginationElement = document.getElementById('pagination');
 const rowsPerPageElement = document.getElementById('r_p_page');
 
 const accountDiv = document.getElementById('account-div')
-
-function addExpense() {
-
-
-  const amount = amountInput.value.trim();
-  const description = descriptionInput.value.trim();
-  const category = categoryInput.value;
-  const id = idInput.value;
-
-  if (amount === '' || description === '') {
-    alert('Please enter both amount and description.');
-    return;
-  }
-
-  const newExpense = {
-    amount: parseFloat(amount),
-    description: description,
-    category: category,
-    userId: getToken(),
-  };
-  if (id === '') {
-    // add to server
-    axios
-      .post(baseUrl + 'add-expense', newExpense, { headers: { Authorization: getToken() } })
-      .then((res) => {
-        location.reload();
-
-      })
-      .catch((err) => console.log(err));
-  } else {
-    const newExpense = {
-      amount: parseFloat(amount),
-      description: description,
-      category: category,
-      id: id,
-      userId: getToken()
-    };
-    axios
-      .post(baseUrl + 'edit-expense', newExpense, { headers: { Authorization: getToken() } })
-      .then((res) => {
-        location.reload();
-      })
-      .catch((err) => console.log(err));
-  }
+const userList = document.getElementById('userList')
+const chatGroup = document.getElementById('chatGroup')
 
 
-  amountInput.value = '';
-  descriptionInput.value = '';
-  displayExpenses();
-}
 
 async function addChat(e) {
 
@@ -155,84 +109,9 @@ async function displayChats() {
 
 
 }
-async function displayExpenses() {
-
-  try {
-    checkPremium();
-    const currentUrl = window.location.href;
-    // Create a new URLSearchParams object with the URL's search parameter string
-    const searchParams = new URLSearchParams(new URL(currentUrl).search);
-    // Get individual query parameters using the get() method
-    const pageNo = searchParams.get('page') || 1;
-    let rowPerPage = localStorage.getItem('rowsPerPage')
-    if (rowPerPage) {
-      rowPerPage = parseInt(rowPerPage);
-    } else {
-      rowPerPage = 5;
-    }
-    console.log(rowPerPage);
-    rowsPerPageElement.value = rowPerPage;
-
-    const expenseList = document.getElementById('expenseList');
-    const res = await axios.get(baseUrl + `expenses?page=${pageNo}&rowPerPage=${rowPerPage}`, { headers: { "Authorization": getToken() } })
-    const expenses = res.data.expenses;
-
-    expenseList.innerHTML = '';
-
-    expenses.forEach((expense) => {
-      const li = document.createElement('li');
-      li.classList.add("list-group-item");
-      li.innerHTML = `<strong>${expense.description}</strong> - $${expense.amount.toFixed(2)} (${expense.category}) <button onclick="editExpense(${expense.id},event)" class="btn btn-sm btn-outline-success">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id})">Delete</button>`;
-      expenseList.appendChild(li);
-    });
-    createPagination(res.data, pageNo);
-
-  } catch (error) {
-    // alert("please start your backend server. ")
-    console.log(error);
-  }
 
 
-}
 
-function editExpense(id, e) {
-
-  axios
-    .get(baseUrl + '/edit-expense/' + id)
-    .then((res) => {
-      if (res.status === 200) {
-        // inserting the values in form input
-        amountInput.value = res.data.amount
-        descriptionInput.value = res.data.description
-        idInput.value = id;
-        btn.textContent = 'Update';
-
-        Array.from(document.querySelector('#category').options).forEach(option => {
-          if (option.value == res.data.category)
-            option.selected = true
-        });
-      }
-    })
-    .catch((err) => console.log(err));
-
-}
-
-function deleteExpense(id) {
-  const confirmRes = confirm("Are you sure want to delete ?");
-  if (!confirmRes) {
-    return;
-  }
-  axios
-    .delete(baseUrl + 'delete-expense/' + id, { headers: { Authorization: getToken() } })
-    .then((res) => {
-      if (res.status === 200) {
-        location.reload();
-      }
-    })
-    .catch((err) => console.log(err));
-
-
-}
 async function signup(e) {
   e.preventDefault();
   try {
@@ -338,93 +217,6 @@ function getToken() {
   }
 }
 
-async function buyMembership() {
-  // Fetch the order details from the backend
-
-  const postData = {
-    amount: 1000, // Specify amount in paisa (e.g., ₹10 = 1000)
-    currency: 'INR' // Specify the currency
-  };
-  const data = await axios.post(baseUrl + 'create-order', postData, { headers: { Authorization: getToken() } })
-  // Initialize Razorpay checkout
-  const options = {
-    key: 'rzp_test_xlWAAcbItraEsW',
-    currency: data.data.order.currency,
-    order_id: data.data.order.id,
-    name: 'The Chat Haven ',
-    description: 'Payment for Premium Features',
-    image: 'https://your-company-logo-url.png',
-    handler: async function (response) {
-      const token = await axios.post(baseUrl + 'update-order', response, { headers: { Authorization: getToken() } })
-      if (token) {
-        localStorage.setItem('token', JSON.stringify(token.data));
-      }
-      alert("you are now Premium user");
-      showPremium();
-    },
-    prefill: {
-      name: 'Customer Name',
-      email: 'customer@example.com',
-      contact: '9999999999'
-    },
-    theme: {
-      color: '#3399cc'
-    }
-  };
-
-  const rzp1 = new Razorpay(options);
-  rzp1.open();
-  rzp1.on('payment.failed', async function (response) {
-    // console.log(response);
-    await axios.post(baseUrl + 'update-failed-order', response, { headers: { Authorization: getToken() } })
-    alert('something went wrong.')
-  })
-}
-
-
-function showPremium() {
-  accountDiv.innerHTML = `
-  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-  <li class="nav-item">
-  <button type="button" onclick="downloadReport()" class="btn btn-sm btn-outline-success mx-2">Download Report</button>
-  </li>
-    <li class="nav-item">
-    <button type="button" onclick="showLeaderboard()" class="btn btn-sm btn-outline-success mx-2">Leader board</button>
-  </li> 
-   <li class="nav-item">
-   <button type="button" disabled class="btn btn-sm btn-outline-outline-success">You are a Premium user.</button>
-  </li> 
-  <li class="nav-item">
-  <a onclick="signout()" class="btn btn-sm btn-outline-success mx-2">Logout</a>
-  </li>
-
-</ul>` ;
-
-}
-
-function checkPremium() {
-  const token = parseJwt(localStorage.getItem('token'));
-  // console.log(token);
-  if (token) {
-    if (token.isPremium) {
-      showPremium();
-    } else {
-      // <button onclick="buyMembership()" class="btn btn-sm btn-outline-success">Buy Membership</button>
-      accountDiv.innerHTML = `<a onclick="signout()" class="btn btn-sm btn-outline-success mx-2">Logout</a>`;
-    }
-  }
-
-}
-async function downloadReport() {
-  const response = await axios.get(baseUrl + 'premium/download-report', { headers: { "Authorization": getToken() } });
-  //the bcakend is essentially sending a download link
-  //  which if we open in browser, the file would download
-  var a = document.createElement("a");
-  a.href = response.data.fileUrl;
-  a.download = 'myexpense.csv';
-  a.click();
-}
-
 async function showLeaderboard() {
   try {
 
@@ -478,6 +270,7 @@ function isValidPassword(password, confirmPassword) {
   // if all condition are true then 
   return true;
 }
+
 function parseJwt(token) {
   var base64Url = token.split('.')[1];
   var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -511,7 +304,6 @@ function createPagination(res, pgNo) {
   }
 }
 
-
 if (rowsPerPageElement) {
   // Add onchange event listener
   rowsPerPageElement.addEventListener('change', function () {
@@ -523,15 +315,77 @@ if (rowsPerPageElement) {
     location.reload();
   });
 }
+
 function scrollToBottom() {
   chatContainer.scrollTop = chatContainer.scrollHeight;
 }
+//  GROUP FUNCTIONS
+async function getUsers() {
+  const res = await axios.get(baseUrl + `get-users`, { headers: { "Authorization": getToken() } })
+
+  res.data.users.forEach((user)=>{
+    const option =  document.createElement('option');
+    option.setAttribute("value",user.id);
+    option.innerHTML=user.name;
+    userList.appendChild(option);
+  })
+
+}
+async function getGroups() {
+  const res = await axios.get(baseUrl + `groups`, { headers: { "Authorization": getToken() } })
+    console.log(res);
+  res.data.groups.forEach((group)=>{
+    const li =  document.createElement('li');
+    li.setAttribute("class","list-group-item");
+    li.innerHTML=`<button class="btn btn-link" onclick='displayGroupChat("${group.id}")'>${group.name}</button>`;
+    chatGroup.appendChild(li);
+  })
+}
+
+async function displayGroupChat(groupId){
+
+}
+async function addGroup(e){
+  try {
+    e.preventDefault();
+  
+    
+    // Access the form element
+    const form = e.target;
+
+   
+    // Retrieve form data
+    const groupName = form.elements['groupName'].value.trim();
+    const userIds = Array.from(form.elements['userList'].selectedOptions).map(option => option.value);
+
+    const postData = {groupName,userIds};
+
+   // add to server
+    const res = await axios.post(baseUrl + 'add-group', postData, { headers: { Authorization: getToken() } });
+      console.log(res);
+
+      alert("Group Created.")
+      window.location.replace(`${window.location.origin}/frontend/chat.html`)
+    // chatInput.value = '';
+    // await displayChats();
+    // scrollToBottom();
+  } catch (err) {
+    console.log(err)
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   if (isUserLoggedIN()) {
-    setInterval(displayChats, 5000);
-    await displayChats()
-    scrollToBottom();
 
+    if (window.location.pathname === `/frontend/create_group.html`) {
+      getUsers();
+    }
+      console.log(window.location);
+    if (window.location.pathname === `/frontend/chat.html`) {
+        getGroups();
+      // setInterval(displayChats, 5000);
+      // await displayChats()
+      // scrollToBottom();
+    }
   }
-
 });
