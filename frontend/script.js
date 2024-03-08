@@ -345,7 +345,7 @@ async function buyMembership() {
     key: 'rzp_test_xlWAAcbItraEsW',
     currency: data.data.order.currency,
     order_id: data.data.order.id,
-    name: 'Group Chat ',
+    name: 'The Chat Haven ',
     description: 'Payment for Premium Features',
     image: 'https://your-company-logo-url.png',
     handler: async function (response) {

@@ -87,7 +87,7 @@ exports.postForgotPassword = async (req, res, next) => {
   // var sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail(); // SendSmtpEmail | Values to send a transactional email
 
 
-  const sender = { email: 'no-reply@expensetracker.com', name: "Group Chat " };
+  const sender = { email: 'no-reply@expensetracker.com', name: "The Chat Haven " };
   const receivers = [{ email: email }];
   apiInstance.sendTransacEmail({
     sender,
