@@ -24,24 +24,18 @@ app.use(cors({
 }))
 app.use(express.json());
 
-// app.set('view engine', 'ejs');
-// app.set('views', 'views');
-
 // ROUTES IMPORT
-const expenseRoutes = require('./routes/expense');
+
 const userRoutes = require('./routes/user');
-const membershipRoutes = require('./routes/membership');
 const chatRoutes = require('./routes/chat');
 
 // DATABASE and MODEL   IMPORT
 const sequelize = require('./util/database');
 const User = require('./models/user');
 const Forgotpassword = require('./models/forgotPassword');
-const Expense = require('./models/expense');
-const Order = require('./models/order');
 const Chat = require('./models/chat');
-
-
+const Group = require('./models/group');
+const GroupUsers = require('./models/groupUsers');
 
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -57,11 +51,7 @@ app.use((req,res)=>{
     res.sendFile(path.join(__dirname,'frontend',req.url));
 })
 //  ASSOCIATION
-// User.hasMany(Expense);
-// Expense.belongsTo(User);
- 
-// User.hasMany(Order);
-// Order.belongsTo(User);
+
 
 User.hasMany(Forgotpassword); 
 Forgotpassword.belongsTo(User);
@@ -69,8 +59,15 @@ Forgotpassword.belongsTo(User);
 User.hasMany(Chat);
 Chat.belongsTo(User);
 
-//   sequelize.sync({force:true})
- sequelize.sync()
+// Group.hasMany(User);
+User.hasMany(Group);
+Group.belongsToMany(User, { through: GroupUsers })
+
+Group.hasMany(Chat);
+
+
+//    sequelize.sync({force:true}) 
+ sequelize.sync() 
     .then(() => {
         app.listen(process.env.PORT || 3000);
     }).catch((err) => {

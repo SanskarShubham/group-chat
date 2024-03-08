@@ -20,7 +20,7 @@ div,
 
 /* Custom Styles */
 #chat-container {
-    max-height: 24rem;
+    max-height: 23rem;
     overflow-y: scroll;
 }
 

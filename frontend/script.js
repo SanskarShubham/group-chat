@@ -136,9 +136,14 @@ async function displayChats() {
       const div = document.createElement('div');
       // Set the class attribute with all the classes
       div.setAttribute("class", "message-container");
+
+      const dateTimeString = chat.createdAt;
+      const dateObject = new Date(dateTimeString);
+      const timeString = dateObject.toLocaleTimeString([], { hour12: true });
+
       div.innerHTML = `
       <div class="message bg-light p-2 mb-2">${chat.user.name}:  ${chat.message}</div>
-      <div class="message-time">12:34 PM</div>`;
+      <div class="message-time">${timeString}</div>`;
       chatContainer.appendChild(div);
     });
 
@@ -303,6 +308,7 @@ async function forgetPassword(e) {
 }
 
 function signout() {
+  localStorage.removeItem('chats');
   localStorage.removeItem('token');
   window.location.replace(`${window.location.origin}/frontend/index.html`);
 }

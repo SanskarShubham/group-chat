@@ -24,7 +24,12 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="chat.html">Home</a>
                     </li>
-                    <!-- Add more navigation items as needed -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Create Group</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">My Groups</a>
+                    </li>
                 </ul>
                 <div class="d-flex" id="account-div">
                     <!-- Include account related elements here -->
@@ -33,33 +38,74 @@
             </div>
         </div>
     </nav>
-    <div class="container mt-3">
-        <div class="card">
-            <div class="card-header text-center">
-                The Chat Haven
-            </div>
-            <div id="chat-container" class="card-body">
-                <!-- <div class="message-container">
-                    <div class="message bg-light p-2 mb-2">demo User: demo msg</div>
-                    <div class="message-time">12:34 PM</div>
-                </div> -->
-                <!-- Messages will be dynamically added here -->
-            </div>
-            <div class="card-footer">
-                <form id="message-form" onsubmit="addChat(event)">
-                    <div class="input-group">
-                        <textarea id="message-input" class="form-control" placeholder="Type your message here..."
-                            rows="2"></textarea>
-                        <button type="submit" class="btn btn-success">Send</button>
+    <div class="container-fluid my-2">
+        <div class="row">
+            <!-- Left Side - Group List -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        Group List
                     </div>
-                </form>
+                    <div class="card-body">
+                        <!-- Display list of groups here -->
+                        <ul class="list-group">
+                            <li class="list-group-item">Group 1</li>
+                            <li class="list-group-item">Group 2</li>
+                            <li class="list-group-item">Group 3</li>
+                            <!-- Add more groups as needed -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Side - Chat Display -->
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        Chat
+                    </div>
+                    <div class="card-body">
+                        <!-- Display chat messages here -->
+                        <div id="chat-container">
+                            <!-- Messages will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <form id="message-form" onsubmit="addChat(event)">
+                            <div class="input-group">
+                                <textarea id="message-input" class="form-control" placeholder="Type your message here..."
+                                    rows="2"></textarea>
+                                <button type="submit" class="btn btn-success">Send</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- <script src="https://checkout.razorpay.com/v1/checkout.js"></script> -->
+    <!-- Group Management Modal -->
+    <div class="modal fade" id="groupManagementModal" tabindex="-1" aria-labelledby="groupManagementModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="groupManagementModalLabel">Group Management</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Group management options and settings -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script src="script.js"></script>
 </body>
 

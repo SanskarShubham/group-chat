@@ -107,7 +107,7 @@ exports.getChats = async (req, res, next) => {
         model: User,
         attributes: ['name'] // Specify the attributes you want to retrieve from the User model
       }],
-      attributes: ['id','message'],
+      attributes: ['id','message','createdAt'],
       where: {
         id: {
           [Op.gt]: lastChatId,
