@@ -26,10 +26,10 @@
                         <a class="nav-link " aria-current="page" href="chat.html">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="create_group.html">Create Group</a>
+                        <a class="nav-link " href="create_group.html">Create Group</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="my-groups.html">My Groups</a></a>
+                        <a class="nav-link active" href="my-groups.html">My Groups</a>
                     </li>
                 </ul>
                 <div class="d-flex" id="account-div">
@@ -40,35 +40,29 @@
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <div class="card">
-            <div class="card-header">
-                <h4>Create Group</h4>
-            </div>
-            <div class="card-body">
-                <form onsubmit="addGroup(event)" method="post">
-                    <div class="mb-3">
-                        <label for="groupName" class="form-label">Group Name</label>
-                        <input type="text" class="form-control" id="groupName" name="groupName"
-                            placeholder="Enter group name">
-                    </div>
-                    <div class="mb-3">
-                        <label for="userList" class="form-label">Select Users</label>
-                        <select class="form-control" id="userList" name="userList" multiple="multiple">
-                            <!-- Add  users dynamically -->
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-outline-success">Create Group</button>
-                </form>
-            </div>
-        </div>
+    <div class="container my-4">
+        <h4 class="my-4">My Groups</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Group Id</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">action</th>
+                </tr>
+            </thead>
+            <tbody id="my-groups">
+                <!-- list will add dynamically -->
+
+            </tbody>
+        </table>
+
     </div>
+
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
     <script src="script.js"></script>
-
 </body>
 
 </html>
