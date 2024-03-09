@@ -5,6 +5,7 @@ const userAuth = require('../middleware/auth');
 
  router.get('/groups',userAuth.authorization, groupController.getGroups);
  router.get('/get-users',userAuth.authorization, groupController.getUsers);
+ router.get('/get-charts',userAuth.authorization, groupController.getChats);
 
 // /api/add-group => POST
 router.get('/edit-group/:groupid', groupController.getEditGroup);

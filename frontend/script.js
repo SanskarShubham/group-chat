@@ -33,11 +33,16 @@ async function addChat(e) {
     const newMessage = {
       message: chatVal,
     };
+     const groupId = localStorage.getItem('groupId');
+     if (groupId) {
+      newMessage.groupId = parseInt(groupId);
+     }
     // add to server
     await axios.post(baseUrl + 'add-chat', newMessage, { headers: { Authorization: getToken() } })
 
     chatInput.value = '';
-    await displayChats();
+    const chats  =  await getChats(groupId);
+    await displayChats(chats);
     scrollToBottom();
   } catch (err) {
     console.log(err)
@@ -45,7 +50,7 @@ async function addChat(e) {
 }
 
 
-async function displayChats() {
+async function getChats(groupId) {
 
   try {
 
@@ -67,9 +72,16 @@ async function displayChats() {
     } else {
       lastChatId = 0;
     }
-
+        let res;
     // checkPremium();
-    const res = await axios.get(baseUrl + `chats?lastChatId=${lastChatId}`, { headers: { "Authorization": getToken() } })
+    if (groupId) {
+      groupId = parseInt(groupId);
+     
+       res = await axios.get(baseUrl + `chats?lastChatId=${lastChatId}&groupId=${groupId}`, { headers: { "Authorization": getToken() } })
+    }else{
+    
+       res = await axios.get(baseUrl + `chats?lastChatId=${lastChatId}`, { headers: { "Authorization": getToken() } })
+    }
 
 
     const chats = res.data.chats;
@@ -84,23 +96,7 @@ async function displayChats() {
       }
       localStorage.setItem('chats', JSON.stringify(localChats));
     }
-
-    chatContainer.innerHTML = '';
-    localChats.forEach((chat) => {
-      const div = document.createElement('div');
-      // Set the class attribute with all the classes
-      div.setAttribute("class", "message-container");
-
-      const dateTimeString = chat.createdAt;
-      const dateObject = new Date(dateTimeString);
-      const timeString = dateObject.toLocaleTimeString([], { hour12: true });
-
-      div.innerHTML = `
-      <div class="message bg-light p-2 mb-2">${chat.user.name}:  ${chat.message}</div>
-      <div class="message-time">${timeString}</div>`;
-      chatContainer.appendChild(div);
-    });
-
+    return localChats;
 
   } catch (error) {
     // alert("please start your backend server. ")
@@ -109,7 +105,27 @@ async function displayChats() {
 
 
 }
-
+async function displayChats(chats) {
+  
+    
+  if ( chats && chats.length > 0) {
+    chatContainer.innerHTML = '';
+    chats.forEach((chat) => {
+      const div = document.createElement('div');
+      // Set the class attribute with all the classes
+      div.setAttribute("class", "message-container");
+  
+      const dateTimeString = chat.createdAt;
+      const dateObject = new Date(dateTimeString);
+      const timeString = dateObject.toLocaleTimeString([], { hour12: true });
+  
+      div.innerHTML = `
+      <div class="message bg-light p-2 mb-2">${chat.user.name}:  ${chat.message}</div>
+      <div class="message-time">${timeString}</div>`;
+      chatContainer.appendChild(div);
+    });
+  }
+ }
 
 
 async function signup(e) {
@@ -187,8 +203,7 @@ async function forgetPassword(e) {
 }
 
 function signout() {
-  localStorage.removeItem('chats');
-  localStorage.removeItem('token');
+  localStorage.clear();
   window.location.replace(`${window.location.origin}/frontend/index.html`);
 }
 function isUserLoggedIN() {
@@ -217,33 +232,7 @@ function getToken() {
   }
 }
 
-async function showLeaderboard() {
-  try {
 
-
-    checkPremium();
-
-    expensesDiv.classList.add('d-none')
-    leaderBoardHeading.classList.remove('d-none');
-    paginationElement.classList.add('d-none');
-
-    const users = await axios.get(baseUrl + 'premium/get-leaderboard', { headers: { "Authorization": getToken() } })
-    const usersData = users.data;
-
-
-    leaderBoard.innerHTML = '';
-
-    usersData.forEach((user) => {
-      const li = document.createElement('li');
-      li.classList.add("list-group-item");
-      li.innerHTML = `<strong>${user.name}</strong> - $${user.totalExpense.toFixed(2)}  `;
-      leaderBoard.appendChild(li);
-    });
-
-  } catch (error) {
-    console.log(error);
-  }
-}
 // testing email
 function isValidPassword(password, confirmPassword) {
   if (password !== confirmPassword) {
@@ -333,7 +322,7 @@ async function getUsers() {
 }
 async function getGroups() {
   const res = await axios.get(baseUrl + `groups`, { headers: { "Authorization": getToken() } })
-    console.log(res);
+    // console.log(res);
   res.data.groups.forEach((group)=>{
     const li =  document.createElement('li');
     li.setAttribute("class","list-group-item");
@@ -343,7 +332,19 @@ async function getGroups() {
 }
 
 async function displayGroupChat(groupId){
-
+  chatContainer.innerHTML = '';
+  localStorage.removeItem('chats');
+  localStorage.setItem('groupId',groupId);
+  
+  const chats = await getChats(groupId);
+  displayChats(chats);
+   const lastIntervalId = localStorage.getItem('lastIntervalId')
+  clearInterval(lastIntervalId);
+    const intervalId  = setInterval(async ()=>{
+    const chats = await getChats(groupId);
+    displayChats(chats);
+  },5000)
+  localStorage.setItem('lastIntervalId',intervalId );
 }
 async function addGroup(e){
   try {
@@ -380,11 +381,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.location.pathname === `/frontend/create_group.html`) {
       getUsers();
     }
-      console.log(window.location);
+      // console.log(window.location);
     if (window.location.pathname === `/frontend/chat.html`) {
         getGroups();
-      // setInterval(displayChats, 5000);
-      // await displayChats()
+      //  setInterval(displayChats, 5000);
+      //  await displayChats()
       // scrollToBottom();
     }
   }

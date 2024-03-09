@@ -6,13 +6,18 @@ const {Op} = require('sequelize');
 exports.postAddChat = async (req, res, next) => {
   let transaction;
   try {
+    const groupId = req.body.groupId | 0;
     const { message } = req.body;
     transaction = await sequelize.transaction();
+     let newChatObj = {
+        message,
+        userId: req.user.id
+      }
 
-    const chat = await Chat.create({
-      message,
-      userId: req.user.id
-    }, { transaction });
+      if (groupId) {
+        newChatObj.groupId = groupId;
+      }
+    const chat = await Chat.create(newChatObj, { transaction });
 
     // await req.user.update({ totalChat: req.user.totalChat + amount }, { transaction });
 
@@ -23,6 +28,7 @@ exports.postAddChat = async (req, res, next) => {
       data: chat,
     });
   } catch (err) {
+    console.log(err);
     if (transaction) await transaction.rollback();
     res.status(500).json({
       status: false,
@@ -100,19 +106,24 @@ exports.postDeleteChat = async (req, res, next) => {
 exports.getChats = async (req, res, next) => {
   try {
     const lastChatId = req.query.lastChatId || 0;
+    const groupId = req.query.groupId || 0;
     // const ITEM_PER_PAGE = parseInt(req.query.rowPerPage || 5);
     // console.log(ITEM_PER_PAGE);
+    const whereClause = {
+      id: {
+        [Op.gt]: lastChatId,
+      },
+    }
+    if (groupId) {
+      whereClause.groupId = groupId;
+    }
     const chats = await Chat.findAll({
       include: [{
         model: User,
         attributes: ['name'] // Specify the attributes you want to retrieve from the User model
       }],
       attributes: ['id','message','createdAt'],
-      where: {
-        id: {
-          [Op.gt]: lastChatId,
-        },
-      },
+      where: whereClause,
        // Specify the attributes you want to retrieve from the Chat model
     })
 
