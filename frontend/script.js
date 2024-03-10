@@ -317,6 +317,18 @@ async function getUsers() {
   })
 
 }
+
+async function getNewUsersforGroup(groupId) {
+  const res = await axios.get(baseUrl + `get-new-users-for-group?groupId=${+groupId}`, { headers: { "Authorization": getToken() } })
+
+  res.data.users.forEach((user) => {
+    const option = document.createElement('option');
+    option.setAttribute("value", user.id);
+    option.innerHTML = user.name;
+    userList.appendChild(option);
+  })
+
+}
 async function getGroups() {
   const res = await axios.get(baseUrl + `groups`, { headers: { "Authorization": getToken() } })
   // console.log(res);
@@ -373,6 +385,41 @@ async function addGroup(e) {
     console.log(err)
   }
 }
+async function addNewUserTOGroup(e) {
+  try {
+
+    e.preventDefault();
+
+    // Access the form element
+    const form = e.target;
+
+    // Get the URL parameters
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    // Get the value of the groupId parameter
+    const groupId = urlParams.get('groupId');
+
+
+    // Retrieve form data
+
+    const userIds = Array.from(form.elements['userList'].selectedOptions).map(option => option.value);
+
+    const postData = { groupId, userIds };
+
+    // add to server
+    const res = await axios.post(baseUrl + 'add-new-member-in-group', postData, { headers: { Authorization: getToken() } });
+    console.log(res);
+
+    alert("Member added.")
+    window.location.replace(`${window.location.origin}/frontend/chat.html`)
+    // chatInput.value = '';
+    // await displayChats();
+    // scrollToBottom();
+  } catch (err) {
+    console.log(err)
+  }
+}
 
 async function getMyGroups() {
   try {
@@ -382,18 +429,18 @@ async function getMyGroups() {
     myGroups.innerHTML = '';
 
     if (groups.length > 0) {
-      groups.forEach((group,index )=> {
+      groups.forEach((group, index) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<tr>
-        <td scope="row">${index+1}</td>
+        <td scope="row">${index + 1}</td>
         <td>${group.name}</td>
-        <td><button class="btn btn-outline-success btn-sm me-2" onclick="addNewUserToGroup(event,${group.id})" >Add User</button><button class="btn btn-outline-danger btn-sm" onclick="deleteGroup(event,${group.id})">Delete</button></td>
+        <td><a class="btn btn-outline-success btn-sm me-2" href="/frontend/add-new-user-in-group.html?groupId=${group.id}" >Add User</a><button class="btn btn-outline-danger btn-sm" onclick="deleteGroup(event,${group.id})">Delete</button></td>
           </tr>`
         myGroups.appendChild(tr);
       })
-    }else{
+    } else {
 
-    myGroups.innerHTML =   `<tr>
+      myGroups.innerHTML = `<tr>
         <td colspan ="3" class" text-center">you did not created any group yet .</td>
       </tr>`
     }
@@ -403,19 +450,19 @@ async function getMyGroups() {
   }
 }
 
- async function deleteGroup(e,groupId){
+async function deleteGroup(e, groupId) {
   try {
-   
-  console.log(groupId);
-  let confirm =  window.confirm("Do you really want to delete !");
-  if (!confirm) {
-    return;
-  }
-  const res = await axios.delete(baseUrl + `delete-group/${groupId}`, { headers: { "Authorization": getToken() } }) 
 
-  var row = e.target.parentNode.parentNode; // Get the row
-  row.parentNode.removeChild(row); 
-  alert("group deleted.")
+    console.log(groupId);
+    let confirm = window.confirm("Do you really want to delete !");
+    if (!confirm) {
+      return;
+    }
+    const res = await axios.delete(baseUrl + `delete-group/${groupId}`, { headers: { "Authorization": getToken() } })
+
+    var row = e.target.parentNode.parentNode; // Get the row
+    row.parentNode.removeChild(row);
+    alert("group deleted.")
   } catch (error) {
     console.log(error);
   }
@@ -427,7 +474,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.location.pathname === `/frontend/create_group.html`) {
       getUsers();
     }
-    // console.log(window.location);
+    if (window.location.pathname === `/frontend/add-new-user-in-group.html`) {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      // Get the value of the groupId parameter
+      const groupId = urlParams.get('groupId');
+      getNewUsersforGroup(groupId);
+    }
+    console.log(window.location);
     if (window.location.pathname === `/frontend/chat.html`) {
       getGroups();
     }

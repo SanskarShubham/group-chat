@@ -32,6 +32,29 @@ exports.postAddGroup = async (req, res, next) => {
   }
 
 };
+exports.postAddMemberInGroup = async (req, res, next) => {
+  try {
+    const { groupId, userIds } = req.body;
+   
+   
+    let transaction = await sequelize.transaction();
+    
+    const group = await Group.findOne({where:{  id: groupId }}, { transaction })
+    const users = await User.findAll({ where: { id: userIds } }, { transaction });
+    if (users.length !== userIds.length) {
+      return res.status(400).json({ error: 'One or more users not found' });
+    }
+
+    await group.addUsers(users, { transaction });
+    await transaction.commit();
+    return res.status(200).json({ group, message: 'Users added to group successfully' });
+  } catch (error) {
+    await transaction.rollback();
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+
+};
 
 exports.postEditGroup = async (req, res, next) => {
   let transaction;
@@ -111,6 +134,39 @@ exports.getGroups = async (req, res, next) => {
       status: true,
       groups
 
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      status: false,
+      error: err.message,
+    });
+  }
+};
+
+exports.getNewUsersForGroups = async (req, res, next) => {
+  try {
+    const groupId  = req.query.groupId;
+
+    const UsersIdsobj = await groupUser.findAll(
+      {
+        attributes: ['userId'],
+        where: {
+          groupId:  groupId
+        }
+      })
+    const usersIdsArr = UsersIdsobj.map(user => user.userId);
+    console.log(usersIdsArr);
+
+    // Access the groups associated with the user
+    const users = await User.findAll({
+      where: { id: {
+        [Op.notIn]: usersIdsArr
+      } }
+    });
+    res.status(200).json({
+      status: true,
+      users
     });
   } catch (err) {
     console.log(err);
