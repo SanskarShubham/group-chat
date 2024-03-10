@@ -3,7 +3,7 @@ const chatController = require('../controllers/chat');
 const router = express.Router();
 const userAuth = require('../middleware/auth');
 
- router.get('/chats',userAuth.authorization, chatController.getChats);
+ router.get('/chats',userAuth.authorization, chatController.getChats); 
 
 // /api/add-chat => POST
 router.get('/edit-chat/:chatid', chatController.getEditChat);

@@ -469,6 +469,7 @@ async function deleteGroup(e, groupId) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const socket = io();
   if (isUserLoggedIN()) {
 
     if (window.location.pathname === `/frontend/create_group.html`) {
