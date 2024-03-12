@@ -2,7 +2,18 @@
 // http://34.207.185.225:3000/api/expenses
 // const baseUrl = "https://34.207.185.225:3000/api/";
 const baseUrl = "http://localhost:3000/api/";
-
+const socket = io(
+   'http://localhost:3000'
+// , {
+//   reconnectionDelay: 1000,
+//   reconnection: true,
+//   reconnectionAttemps: 10,
+//   transports: ['websocket'],
+//   agent: false,
+//   upgrade: false,
+//   rejectUnauthorized: false
+// }
+);
 const chatInput = document.getElementById('message-input');
 const chatContainer = document.getElementById('chat-container');
 
@@ -34,13 +45,14 @@ async function addChat(e) {
     if (groupId) {
       newMessage.groupId = parseInt(groupId);
     }
+    
     // add to server
     await axios.post(baseUrl + 'add-chat', newMessage, { headers: { Authorization: getToken() } })
-
+    socket.emit('message', {chat:chatVal,groupId});
     chatInput.value = '';
-    const chats = await getChats(groupId);
-    await displayChats(chats);
-    scrollToBottom();
+    // const chats = await getChats(groupId);
+    // await displayChats(chats);
+    // scrollToBottom();
   } catch (err) {
     console.log(err)
   }
@@ -59,6 +71,7 @@ async function getChats(groupId) {
 
       localChats = JSON.parse(localChatsString);
       LastIndex = localChats.length - 1;
+      console.log(LastIndex);
       if (LastIndex > 50) {
         localChats = localChats.filter((chat, index) => index > 25);
         LastIndex = localChats.length - 1;
@@ -339,23 +352,35 @@ async function getGroups() {
     chatGroup.appendChild(li);
   })
 }
+socket.on('send_message', async (data) => {
+  console.log(data,'send_message');
+   const localgroupId =  localStorage.getItem('groupId')
 
-async function displayGroupChat(groupId) {
+   if(localgroupId == data.groupId) {
+    await displayGroupChat(data.groupId)
+   }
+  // await displayGroupChat(data.groupId,true)
+})
+async function displayGroupChat(groupId,fromServer) {
   chatContainer.innerHTML = '';
-  localStorage.removeItem('chats');
-  localStorage.setItem('groupId', groupId);
+  if (!fromServer) {
+    
+    localStorage.removeItem('chats');
+    localStorage.setItem('groupId', groupId);
+  }
 
-  const chats = await getChats(groupId);
-  displayChats(chats);
-  const lastIntervalId = localStorage.getItem('lastIntervalId')
-  clearInterval(lastIntervalId);
-  const intervalId = setInterval(async () => {
+  // const chats = await getChats(groupId);
+  // displayChats(chats);
+  // const lastIntervalId = localStorage.getItem('lastIntervalId')
+  // clearInterval(lastIntervalId);
+  // const intervalId = setInterval(async () => {
     const chats = await getChats(groupId);
+    console.log(chats);
     await displayChats(chats);
 
-  }, 5000)
+  // }, 5000)
   scrollToBottom();
-  localStorage.setItem('lastIntervalId', intervalId);
+  // localStorage.setItem('lastIntervalId', intervalId);
 }
 async function addGroup(e) {
   try {
@@ -469,7 +494,7 @@ async function deleteGroup(e, groupId) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const socket = io();
+ 
   if (isUserLoggedIN()) {
 
     if (window.location.pathname === `/frontend/create_group.html`) {

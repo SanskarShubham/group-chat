@@ -1,7 +1,7 @@
-require('dotenv').config({ path: './config.env'});
+require('dotenv').config({ path: './config.env' });
 
 const path = require('path');
-const fs =  require('fs');
+const fs = require('fs');
 const express = require('express');
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
@@ -10,21 +10,21 @@ const { Server } = require('socket.io');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
-const compression =  require('compression');
+const compression = require('compression');
 const morgan = require('morgan');
 
 
-const app = express(); 
+const app = express();
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, { cors: { origin: "*" } });
 
-const accessLogStream = fs.createWriteStream(path.join(__dirname,'access.log'),{flags:'a'});
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 // MIDDLEWARE ROUTES
-app.use(morgan('combined',{stream:accessLogStream}));
-// app.use(compression());
-// app.use(helmet());
+app.use(morgan('combined', { stream: accessLogStream }));
+app.use(compression());
+app.use(helmet());
 app.use(cors())
-app.use(express.json());
+app.use(express.json()); 
 
 // ROUTES IMPORT
 
@@ -43,7 +43,7 @@ const GroupUsers = require('./models/groupUsers');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'frontend','public','js')));
+app.use(express.static(path.join(__dirname, 'frontend', 'public', 'js')));
 
 // ROUTES
 // app.use('/api', expenseRoutes);
@@ -51,19 +51,25 @@ app.use('/api', chatRoutes);
 app.use('/api', userRoutes);
 app.use('/api', groupRoutes);
 // app.use('/api', membershipRoutes);
+app.set("ipaddr", "127.0.0.1");
+app.set("port", 3000);
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
-  });
+    console.log(`a user connected ${socket.id}`);
+    socket.on('message',(msg)=>{
+        console.log(msg);
+        io.emit('send_message',msg);
+    })
+});
 
-app.use('/',(req,res)=>{
-  
-    res.sendFile(path.join(__dirname,req.url));
+app.use('/', (req, res) => {
+
+    res.sendFile(path.join(__dirname, req.url));
 })
 //  ASSOCIATION
 
 
-User.hasMany(Forgotpassword); 
+User.hasMany(Forgotpassword);
 Forgotpassword.belongsTo(User);
 
 User.hasMany(Chat);
@@ -78,7 +84,7 @@ Group.hasMany(Chat);
 
 
 //    sequelize.sync({force:true}) 
- sequelize.sync() 
+sequelize.sync()
     .then(() => {
         server.listen(process.env.PORT || 3000);
     }).catch((err) => {
