@@ -29,6 +29,7 @@ const accountDiv = document.getElementById('account-div')
 const userList = document.getElementById('userList')
 const chatGroup = document.getElementById('chatGroup')
 const myGroups = document.getElementById('my-groups')
+const mediaInput = document.getElementById('media-input')
 
 
 
@@ -36,18 +37,35 @@ const myGroups = document.getElementById('my-groups')
 async function addChat(e) {
 
   try {
+
     e.preventDefault();
+    console.log(mediaInput.files);
     const chatVal = chatInput.value.trim();
     const newMessage = {
       message: chatVal,
     };
+    const file = mediaInput.files[0]; 
+    const formData = new FormData();
+    formData.append('file', file);
+    formData['message'] = chatVal;
+
     const groupId = localStorage.getItem('groupId');
     if (groupId) {
       newMessage.groupId = parseInt(groupId);
     }
-    
+    // if(mediaInput.files) {
+    //   newMessage.file = 
+    // }
+    const headerObj = {
+       Authorization: getToken() 
+    }
+    // if (mediaInput.files) {
+      
+    //   headerObj['Content-Type'] = 'multipart/form-data';
+    // }
+    console.log(newMessage);
     // add to server
-    await axios.post(baseUrl + 'add-chat', newMessage, { headers: { Authorization: getToken() } })
+    await axios.post(baseUrl + 'add-chat', formData, { headers: headerObj })
     socket.emit('message', {chat:chatVal,groupId});
     chatInput.value = '';
     // const chats = await getChats(groupId);
@@ -63,6 +81,7 @@ async function getChats(groupId) {
 
   try {
 
+
     let localChats;
     let lastChatId;
     let LastIndex;
@@ -71,7 +90,6 @@ async function getChats(groupId) {
 
       localChats = JSON.parse(localChatsString);
       LastIndex = localChats.length - 1;
-      console.log(LastIndex);
       if (LastIndex > 50) {
         localChats = localChats.filter((chat, index) => index > 25);
         LastIndex = localChats.length - 1;
@@ -83,7 +101,6 @@ async function getChats(groupId) {
       lastChatId = 0;
     }
     let res;
-    // checkPremium();
     if (groupId) {
       groupId = parseInt(groupId);
 
@@ -96,7 +113,6 @@ async function getChats(groupId) {
 
     const chats = res.data.chats;
 
-    // console.log(chats);
     if (chats.length > 0) {
 
       if (localChatsString) {
@@ -110,7 +126,7 @@ async function getChats(groupId) {
 
   } catch (error) {
     // alert("please start your backend server. ")
-    console.log(error);
+    console.log('Error in getChats function', error);
   }
 
 
@@ -356,8 +372,8 @@ socket.on('send_message', async (data) => {
   console.log(data,'send_message');
    const localgroupId =  localStorage.getItem('groupId')
 
-   if(localgroupId == data.groupId) {
-    await displayGroupChat(data.groupId)
+   if(localgroupId && parseInt(localgroupId) == data.groupId) {
+    await displayGroupChat(data.groupId,true)
    }
   // await displayGroupChat(data.groupId,true)
 })

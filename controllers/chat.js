@@ -3,9 +3,16 @@ const User = require('../models/user');
 const sequelize = require('../util/database');
 const {Op} = require('sequelize');
 
+
+
 exports.postAddChat = async (req, res, next) => {
   let transaction;
   try {
+ 
+    console.log(req.file,'file3244');
+    console.log(req.media,'media3425');
+    console.log(req.body)
+
     const groupId = req.body.groupId | 0;
     const { message } = req.body;
     transaction = await sequelize.transaction();
