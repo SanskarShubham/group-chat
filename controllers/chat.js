@@ -1,29 +1,51 @@
+const fs = require('fs');
 const Chat = require('../models/chat');
 const User = require('../models/user');
 const sequelize = require('../util/database');
-const {Op} = require('sequelize');
+const awsS3 = require('../util/aws-s3');
+const getFileTypeFromMimeType = require('../util/mimetype');
+const { Op } = require('sequelize');
 
 
 
 exports.postAddChat = async (req, res, next) => {
   let transaction;
   try {
- 
-    console.log(req.file,'file3244');
-    console.log(req.media,'media3425');
-    console.log(req.body)
+    let { message } = req.body;
+    let newChatObj = {
+      message,
+      userId: req.user.id
+    }
+    const file = req.file;
+    if (file) {
+      const awsResponse = await awsS3(file);
+      newChatObj['fileName'] = awsResponse.Location
+      newChatObj['type'] = getFileTypeFromMimeType(file.mimetype)
+      console.log(file.path);
+      // Delete the file from local server after successful upload to S3
+      // Delete the file from local server after successful upload to S3
+    fs.unlink(file.path, (err) => {
+      if (err) {
+        console.error('Error deleting file from local server:', err);
+      } else {
+        console.log('File deleted from local server');
+      }
+    });
+
+    }
+
 
     const groupId = req.body.groupId | 0;
-    const { message } = req.body;
-    transaction = await sequelize.transaction();
-     let newChatObj = {
-        message,
-        userId: req.user.id
-      }
 
-      if (groupId) {
-        newChatObj.groupId = groupId;
-      }
+    transaction = await sequelize.transaction();
+
+    if (file) {
+      newChatObj.file = message
+    }
+    if (groupId) {
+      newChatObj.groupId = groupId;
+    }
+    console.log(newChatObj);
     const chat = await Chat.create(newChatObj, { transaction });
 
     // await req.user.update({ totalChat: req.user.totalChat + amount }, { transaction });
@@ -51,7 +73,7 @@ exports.postEditChat = async (req, res, next) => {
 
     transaction = await sequelize.transaction();
 
-    const existingChat = await Chat.findOne({ where: { id:id, userId: req.user.id } });
+    const existingChat = await Chat.findOne({ where: { id: id, userId: req.user.id } });
 
     await req.user.update({ totalChat: req.user.totalChat - existingChat.amount + amount }, { transaction });
 
@@ -86,7 +108,7 @@ exports.postDeleteChat = async (req, res, next) => {
 
     const chat = await Chat.findOne({ where: { id, userId: req.user.id } });
 
-    await req.user.update({ totalChat: req.user.totalChat - chat.amount}, { transaction });
+    await req.user.update({ totalChat: req.user.totalChat - chat.amount }, { transaction });
 
     if (!chat) {
       throw new Error('Chat not found or you do not have permission to delete');
@@ -129,9 +151,9 @@ exports.getChats = async (req, res, next) => {
         model: User,
         attributes: ['name'] // Specify the attributes you want to retrieve from the User model
       }],
-      attributes: ['id','message','createdAt'],
+      // attributes: ['id','message','createdAt'],
       where: whereClause,
-       // Specify the attributes you want to retrieve from the Chat model
+      // Specify the attributes you want to retrieve from the Chat model
     })
 
     // {
@@ -141,26 +163,26 @@ exports.getChats = async (req, res, next) => {
     // }
     // const totalChatCount = await  Chat.count({where:{userId:req.user.id}})
 
-      // Calculate total page count
-      // const lastPage   = Math.ceil(totalChatCount / ITEM_PER_PAGE);
-      // const hasNextPage = pageNo * ITEM_PER_PAGE < totalChatCount;
-      // const nextPage = pageNo+1;
-      // const hasPrevPage = pageNo > 1;     
-      // const PrevPage= pageNo-1;
-      
+    // Calculate total page count
+    // const lastPage   = Math.ceil(totalChatCount / ITEM_PER_PAGE);
+    // const hasNextPage = pageNo * ITEM_PER_PAGE < totalChatCount;
+    // const nextPage = pageNo+1;
+    // const hasPrevPage = pageNo > 1;     
+    // const PrevPage= pageNo-1;
 
-    
+
+
 
     res.status(200).json({
       status: true,
-       chats
+      chats
       //  ,lastPage,hasNextPage,nextPage,hasPrevPage,PrevPage,pageNo
     });
   } catch (err) {
     console.log(err);
     res.status(500).json({
       status: false,
-      error: err.message, 
+      error: err.message,
     });
   }
 };

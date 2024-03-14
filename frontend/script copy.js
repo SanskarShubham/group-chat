@@ -36,7 +36,7 @@ const mediaInput = document.getElementById('media-input')
 
 async function addChat(e) {
   console.log(e);
-  const preview = document.getElementById('preview');
+
   e.preventDefault();
   try {
 
@@ -63,9 +63,9 @@ async function addChat(e) {
     axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
     // add to server
     await axios.post(baseUrl + 'add-chat', formData, { headers: headerObj })
-    socket.emit('message', { chat: chatVal, groupId });
+    // socket.emit('message', { chat: chatVal, groupId });
     chatInput.value = '';
-    preview.innerHTML = '';
+    
   } catch (err) {
    
     console.log(err)
@@ -187,7 +187,7 @@ async function signup(e) {
     const res = await axios.post(baseUrl + 'signup', userData)
     if (res.status === 200) {
       // Similar behavior as an HTTP redirect
-      window.location.replace(`${window.location.origin}/index.html`);
+      window.location.replace(`${window.location.origin}/frontend/index.html`);
     }
   } catch (error) {
     if (error.response.status == 403) {
@@ -219,7 +219,7 @@ async function login(e) {
       alert("user logged in successfully.")
 
       // Similar behavior as an HTTP redirect
-      window.location.replace(`${window.location.origin}/chat.html`);
+      window.location.replace(`${window.location.origin}/frontend/chat.html`);
     }
   } catch (error) {
     console.log(error);
@@ -241,19 +241,19 @@ async function forgetPassword(e) {
 
 function signout() {
   localStorage.clear();
-  window.location.replace(`${window.location.origin}/index.html`);
+  window.location.replace(`${window.location.origin}/frontend/index.html`);
 }
 function isUserLoggedIN() {
 
-  if (!(window.location.pathname == "/index.html" || window.location.pathname == "/signup.html" || window.location.pathname == "/forget-password.html")) {
+  if (!(window.location.pathname == "/frontend/index.html" || window.location.pathname == "/frontend/signup.html" || window.location.pathname == "/frontend/forget-password.html")) {
     const user = localStorage.getItem('token');
     if (!user) {
-      window.location.replace(`${window.location.origin}/index.html`);
+      window.location.replace(`${window.location.origin}/frontend/index.html`);
     }
     const userObj = JSON.parse(user);
     if (userObj.isLogin !== true) {
 
-      window.location.replace(`${window.location.origin}/index.html`);
+      window.location.replace(`${window.location.origin}/frontend/index.html`);
 
     }
     return true;
@@ -265,7 +265,7 @@ function getToken() {
   if (tokenString) {
     return JSON.parse(tokenString).data;
   } else {
-    window.location.replace(`${window.location.origin}/index.html`);
+    window.location.replace(`${window.location.origin}/frontend/index.html`);
   }
 }
 
@@ -429,7 +429,7 @@ async function addGroup(e) {
     console.log(res);
 
     alert("Group Created.")
-    window.location.replace(`${window.location.origin}/chat.html`)
+    window.location.replace(`${window.location.origin}/frontend/chat.html`)
     // chatInput.value = '';
     // await displayChats();
     // scrollToBottom();
@@ -464,7 +464,7 @@ async function addNewUserTOGroup(e) {
     console.log(res);
 
     alert("Member added.")
-    window.location.replace(`${window.location.origin}/chat.html`)
+    window.location.replace(`${window.location.origin}/frontend/chat.html`)
     // chatInput.value = '';
     // await displayChats();
     // scrollToBottom();
@@ -486,7 +486,7 @@ async function getMyGroups() {
         tr.innerHTML = `<tr>
         <td scope="row">${index + 1}</td>
         <td>${group.name}</td>
-        <td><a class="btn btn-outline-success btn-sm me-2" href="/add-new-user-in-group.html?groupId=${group.id}" >Add User</a><button class="btn btn-outline-danger btn-sm" onclick="deleteGroup(event,${group.id})">Delete</button></td>
+        <td><a class="btn btn-outline-success btn-sm me-2" href="/frontend/add-new-user-in-group.html?groupId=${group.id}" >Add User</a><button class="btn btn-outline-danger btn-sm" onclick="deleteGroup(event,${group.id})">Delete</button></td>
           </tr>`
         myGroups.appendChild(tr);
       })
@@ -524,10 +524,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (isUserLoggedIN()) {
 
-    if (window.location.pathname === `/create_group.html`) {
+    if (window.location.pathname === `/frontend/create_group.html`) {
       getUsers();
     }
-    if (window.location.pathname === `/add-new-user-in-group.html`) {
+    if (window.location.pathname === `/frontend/add-new-user-in-group.html`) {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       // Get the value of the groupId parameter
@@ -535,11 +535,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       getNewUsersforGroup(groupId);
     }
     console.log(window.location);
-    if (window.location.pathname === `/chat.html`) {
+    if (window.location.pathname === `/frontend/chat.html`) {
       getGroups();
     }
 
-    if (window.location.pathname === `/my-groups.html`) {
+    if (window.location.pathname === `/frontend/my-groups.html`) {
       getMyGroups();
     }
   }

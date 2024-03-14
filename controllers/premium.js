@@ -56,7 +56,7 @@ exports.getDownloadReport = async (req, res, next) => {
   // Replace with your AWS credentials and bucket details
   const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
   const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-  const bucketName = process.env.BUCKET_NAME;
+ 
 
 
   const s3 = new AWS.S3({
