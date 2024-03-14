@@ -37,6 +37,7 @@ const mediaInput = document.getElementById('media-input')
 async function addChat(e) {
   console.log(e);
   const preview = document.getElementById('preview');
+  const file = document.querySelector('input[type=file]')
   e.preventDefault();
   try {
 
@@ -66,6 +67,9 @@ async function addChat(e) {
     socket.emit('message', { chat: chatVal, groupId });
     chatInput.value = '';
     preview.innerHTML = '';
+    mediaInput.value = null;
+    mediaInput.value = '';
+   
   } catch (err) {
    
     console.log(err)
