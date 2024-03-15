@@ -5,8 +5,8 @@ const fs = require('fs');
 const express = require('express');
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
-
-// MIDDLEWARE IMPORTS
+require('./util/chat-archive-cronjob')
+// MIDDLEWARE IMPORTS IMPORTS
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -24,7 +24,7 @@ app.use(morgan('combined', { stream: accessLogStream }));
 app.use(compression());
 app.use(helmet());
 app.use(cors())
-app.use(express.json()); 
+app.use(express.json());  
 
 // ROUTES IMPORT
 
