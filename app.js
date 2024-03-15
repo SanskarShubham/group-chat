@@ -30,7 +30,7 @@ app.use(express.json());
 
 const userRoutes = require('./routes/user');
 const chatRoutes = require('./routes/chat');
-const groupRoutes = require('./routes/group');
+const groupRoutes = require('./routes/group'); 
 
 // DATABASE and MODEL   IMPORT
 const sequelize = require('./util/database');
