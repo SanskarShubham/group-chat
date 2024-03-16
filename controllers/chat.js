@@ -13,8 +13,10 @@ exports.postAddChat = async (req, res, next) => {
   try {
     let { message } = req.body;
     let newChatObj = {
-      message,
       userId: req.user.id
+    }
+    if(message) {
+      newChatObj['message'] = message;
     }
     const file = req.file;
     if (file) {

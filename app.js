@@ -12,6 +12,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
+const userAuth = require('./middleware/auth'); 
 
 
 const app = express();
@@ -49,7 +50,7 @@ app.use(express.static(path.join(__dirname, 'frontend', 'public', 'js')));
 // app.use('/api', expenseRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', userRoutes);
-app.use('/api', groupRoutes);
+app.use('/api',userAuth.authorization, groupRoutes);
 // app.use('/api', membershipRoutes);
 app.set("ipaddr", "127.0.0.1");
 app.set("port", 3000);

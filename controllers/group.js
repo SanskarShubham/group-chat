@@ -156,12 +156,43 @@ exports.getNewUsersForGroups = async (req, res, next) => {
         }
       })
     const usersIdsArr = UsersIdsobj.map(user => user.userId);
-    console.log(usersIdsArr);
 
     // Access the groups associated with the user
     const users = await User.findAll({
       where: { id: {
         [Op.notIn]: usersIdsArr
+      } }
+    });
+    res.status(200).json({
+      status: true,
+      users
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      status: false,
+      error: err.message,
+    });
+  }
+};
+
+exports.getAllGroupUsers = async (req, res, next) => {
+  try {
+    const groupId  = req.query.groupId;
+
+    const UsersIdsobj = await groupUser.findAll(
+      {
+        attributes: ['userId'],
+        where: {
+          groupId:  groupId
+        }
+      })
+    const usersIdsArr = UsersIdsobj.map(user => user.userId);
+
+    // Access the groups associated with the user
+    const users = await User.findAll({
+      where: { id: {
+        [Op.in]: usersIdsArr
       } }
     });
     res.status(200).json({

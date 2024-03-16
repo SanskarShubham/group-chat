@@ -7,7 +7,7 @@ const upload = require('../middleware/multer');
 router.get('/chats', userAuth.authorization, chatController.getChats);
 
 // /api/add-chat => POST
-router.get('/edit-chat/:chatid', chatController.getEditChat);
+// router.get('/edit-chat/:chatid', chatController.getEditChat);
 router.post('/add-chat', [userAuth.authorization, upload.single('file')], chatController.postAddChat);
 
 // router.get('/edit-chat/:chatId', chatController.getEditChat);

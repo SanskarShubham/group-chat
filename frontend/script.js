@@ -25,27 +25,31 @@ const paginationElement = document.getElementById('pagination');
 
 const rowsPerPageElement = document.getElementById('r_p_page');
 
-const accountDiv = document.getElementById('account-div')
-const userList = document.getElementById('userList')
-const chatGroup = document.getElementById('chatGroup')
-const myGroups = document.getElementById('my-groups')
-const mediaInput = document.getElementById('media-input')
+const accountDiv = document.getElementById('account-div');
+const userList = document.getElementById('userList');
+const chatGroup = document.getElementById('chatGroup');
+const myGroups = document.getElementById('my-groups');
+const mediaInput = document.getElementById('media-input');
+const groupNameSpan = document.getElementById('groupName');
+const membersTable = document.getElementById('members-table');
 
 
 
 
 async function addChat(e) {
-  console.log(e);
+
   const preview = document.getElementById('preview');
-  const file = document.querySelector('input[type=file]')
+
   e.preventDefault();
   try {
-
-    
-    console.log(mediaInput.files);
     const chatVal = chatInput.value.trim();
-  
     const file = mediaInput.files[0];
+
+    //  if both are empty return
+    if (!chatVal && !file) {
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('message', chatVal);
@@ -60,7 +64,7 @@ async function addChat(e) {
       Authorization: getToken()
     }
 
-    console.log(formData);
+    // // console.log(formData);
     axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
     // add to server
     await axios.post(baseUrl + 'add-chat', formData, { headers: headerObj })
@@ -69,10 +73,10 @@ async function addChat(e) {
     preview.innerHTML = '';
     mediaInput.value = null;
     mediaInput.value = '';
-   
+
   } catch (err) {
-   
-    console.log(err)
+
+    console.error(err);
   }
 }
 
@@ -126,7 +130,7 @@ async function getChats(groupId) {
 
   } catch (error) {
     // alert("please start your backend server. ")
-    console.log('Error in getChats function', error);
+    // console.log('Error in getChats function', error);
   }
 
 
@@ -135,7 +139,7 @@ async function displayChats(chats) {
 
 
   if (chats && chats.length > 0) {
-    console.log(chats);
+    // // console.log(chats);
     chatContainer.innerHTML = '';
     chats.forEach((chat) => {
       const div = document.createElement('div');
@@ -145,12 +149,12 @@ async function displayChats(chats) {
       const dateTimeString = chat.createdAt;
       const dateObject = new Date(dateTimeString);
       const timeString = dateObject.toLocaleTimeString([], { hour12: true });
-
-      div.innerHTML = `
-      <div class="message bg-light p-2 mb-2">${chat.user.name}:  ${chat.message}</div>
-      <div class="message-time">${timeString}</div>`;
-      chatContainer.appendChild(div);
-
+      if (chat.message) {
+        div.innerHTML = `
+        <div class="message bg-light p-2 mb-2">${chat.user.name}:  ${chat.message}</div>
+        <div class="message-time">${timeString}</div>`;
+        chatContainer.appendChild(div);
+      }
       // to display image
       if (chat.type === "image") {
         const div = document.createElement('div');
@@ -161,6 +165,7 @@ async function displayChats(chats) {
           <div class="card-body">
             <h5 class="card-title">${chat.user.name}</h5>
             <a href="${chat.fileName}" class="btn btn-sm btn-primary">Download</a>
+            <div class="timestamp">${timeString}</div>
           </div>`;
         chatContainer.appendChild(div);
       }
@@ -177,7 +182,7 @@ async function signup(e) {
     const email = document.getElementById('email_id').value.trim();
     const password = document.getElementById('password').value.trim();
     const cpassword = document.getElementById('cpassword').value.trim();
-    // console.log(name,email,password,cpassword);
+    // // console.log(name,email,password,cpassword);
     if (password !== cpassword) {
 
       alert("password and Confirm password does not match")
@@ -206,19 +211,19 @@ async function login(e) {
 
     const email = document.getElementById('email_id').value.trim();
     const password = document.getElementById('password').value.trim();
-    // console.log(email, password);
+    // // console.log(email, password);
 
     const userData = {
       email: email,
       password: password
     };
-    // console.log(userData);
+    // // console.log(userData);
     const res = await axios.post(baseUrl + 'login', userData)
 
     Object.assign(res.data, { isLogin: true });
 
     if (res.status === 200) {
-      // console.log(res.data);
+      // // console.log(res.data);
       localStorage.setItem('token', JSON.stringify(res.data))
       alert("user logged in successfully.")
 
@@ -226,7 +231,7 @@ async function login(e) {
       window.location.replace(`${window.location.origin}/chat.html`);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     if (error.response.status == 404) {
       alert("User does not exist.");
     }
@@ -240,7 +245,7 @@ async function forgetPassword(e) {
   e.preventDefault();
   const email = document.getElementById('email_id').value.trim();
   const res = await axios.post(baseUrl + 'forgot-password', { email })
-  // console.log(res);
+  // // console.log(res);
 }
 
 function signout() {
@@ -375,38 +380,44 @@ async function getNewUsersforGroup(groupId) {
 }
 async function getGroups() {
   const res = await axios.get(baseUrl + `groups`, { headers: { "Authorization": getToken() } })
-  // console.log(res);
+  // // console.log(res);
   res.data.groups.forEach((group) => {
     const li = document.createElement('li');
     li.setAttribute("class", "list-group-item");
-    li.innerHTML = `<button class="btn btn-link" onclick='displayGroupChat("${group.id}")'>${group.name}</button>`;
+    li.innerHTML = `<button class="btn btn-link" onclick='displayGroupChat("${group.id}","${group.name}")'>${group.name}</button>`;
     chatGroup.appendChild(li);
   })
 }
 socket.on('send_message', async (data) => {
-  console.log(data, 'send_message');
+  // // console.log(data, 'send_message');
   const localgroupId = localStorage.getItem('groupId')
-
+  const groupName = localStorage.getItem('groupName');
   if (localgroupId && parseInt(localgroupId) == data.groupId) {
-    await displayGroupChat(data.groupId, true)
+    await displayGroupChat(data.groupId, groupName, 'socket')
   }
   // await displayGroupChat(data.groupId,true)
 })
-async function displayGroupChat(groupId, fromServer) {
+async function displayGroupChat(groupId, groupName, sendLocation) {
+  localStorage.setItem('groupName', groupName);
   chatContainer.innerHTML = '';
-  if (!fromServer) {
-
+  if (sendLocation !== 'socket') {
+    
     localStorage.removeItem('chats');
     localStorage.setItem('groupId', groupId);
-  }
 
-  // const chats = await getChats(groupId);
-  // displayChats(chats);
-  // const lastIntervalId = localStorage.getItem('lastIntervalId')
-  // clearInterval(lastIntervalId);
-  // const intervalId = setInterval(async () => {
+    groupNameSpan.innerHTML = groupName;
+    const res = await axios.get(baseUrl + `get-all-group-users?groupId=${groupId}`, { headers: { "Authorization": getToken() } })
+    console.log(res);
+    res.data.users.forEach((user, index) => {
+      const tr = document.createElement('tr');
+      // tr.setAttribute("value", user.id);
+      tr.innerHTML = `<td>${index + 1}</td><td>${user.name}</td>`;
+      membersTable.appendChild(tr);
+    })
+
+  }
   const chats = await getChats(groupId);
-  console.log(chats);
+  // // console.log(chats);
   await displayChats(chats);
 
   // }, 5000)
@@ -430,7 +441,7 @@ async function addGroup(e) {
 
     // add to server
     const res = await axios.post(baseUrl + 'add-group', postData, { headers: { Authorization: getToken() } });
-    console.log(res);
+    // // console.log(res);
 
     alert("Group Created.")
     window.location.replace(`${window.location.origin}/chat.html`)
@@ -438,49 +449,36 @@ async function addGroup(e) {
     // await displayChats();
     // scrollToBottom();
   } catch (err) {
-    console.log(err)
+    console.error(err);
   }
 }
 async function addNewUserTOGroup(e) {
   try {
-
     e.preventDefault();
 
     // Access the form element
     const form = e.target;
-
     // Get the URL parameters
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-
     // Get the value of the groupId parameter
     const groupId = urlParams.get('groupId');
-
-
     // Retrieve form data
-
     const userIds = Array.from(form.elements['userList'].selectedOptions).map(option => option.value);
-
     const postData = { groupId, userIds };
-
     // add to server
     const res = await axios.post(baseUrl + 'add-new-member-in-group', postData, { headers: { Authorization: getToken() } });
-    console.log(res);
-
     alert("Member added.")
     window.location.replace(`${window.location.origin}/chat.html`)
-    // chatInput.value = '';
-    // await displayChats();
-    // scrollToBottom();
   } catch (err) {
-    console.log(err)
+    console.error(err);
   }
 }
 
 async function getMyGroups() {
   try {
     const res = await axios.get(baseUrl + `get-user-groups`, { headers: { "Authorization": getToken() } })
-    console.log(res);
+    // // console.log(res);
     const groups = res.data.groups;
     myGroups.innerHTML = '';
 
@@ -502,14 +500,14 @@ async function getMyGroups() {
     }
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
 async function deleteGroup(e, groupId) {
   try {
 
-    console.log(groupId);
+    // // console.log(groupId);
     let confirm = window.confirm("Do you really want to delete !");
     if (!confirm) {
       return;
@@ -520,7 +518,7 @@ async function deleteGroup(e, groupId) {
     row.parentNode.removeChild(row);
     alert("group deleted.")
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
@@ -538,7 +536,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const groupId = urlParams.get('groupId');
       getNewUsersforGroup(groupId);
     }
-    console.log(window.location);
+    // // console.log(window.location);
     if (window.location.pathname === `/chat.html`) {
       getGroups();
     }

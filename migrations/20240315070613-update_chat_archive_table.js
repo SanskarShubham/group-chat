@@ -19,7 +19,7 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     return Promise.all([
       queryInterface.removeColumn('ChatArchive', 'createdAt'),
-      queryInterface.removeColumn('ChatArchive', 'updatedAt'),
+      queryInterface.removeColumn('ChatArchive', 'updatedAt'), 
       // Remove other columns in reverse order
     ]);
   }

@@ -32,3 +32,12 @@
     color: #5e666d;
     font-size: 1.0rem;
 }
+.timestamp {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    font-size: 12px; /* Adjust font size as needed */
+    color: #555; /* Adjust color as needed */
+    padding: 5px; /* Adjust padding as needed */
+    background-color: rgba(255, 255, 255, 0.5); /* Adjust background color and opacity as needed */
+}
