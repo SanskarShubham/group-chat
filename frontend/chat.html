@@ -63,7 +63,9 @@
             <div class="col-md-9">
                 <div class="card ">
                     <div class="card-header d-flex justify-content-between ">
-                        <span id="groupName">Chat</span><span ><button id="members"  data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-sm btn-outline-success">members</button></span> 
+                        <span id="groupName">Chat</span><span><button id="members" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal"
+                                class="btn btn-sm btn-outline-success">members</button></span>
                     </div>
                     <div class="card-body">
                         <!-- Display chat messages here -->
@@ -85,7 +87,8 @@
                                 <input id="message-input" class="form-control" placeholder="Type your message here..."
                                     rows="2">
                                 <input type="file" name="file" id="media-input" class="form-control"
-                                    style="display:none;" accept="image/*,video/*" onchange="previewFile()" />
+                                    style="display:none;" onchange="previewFile()" />
+                                <!-- accept="image/*,video/*,audio/*,pdf/*" -->
                                 <button type="button" class="btn btn-info"
                                     onclick="document.getElementById('media-input').click();">
                                     <i class="fas fa-paperclip"></i> <!-- Font Awesome paperclip icon -->
@@ -100,32 +103,32 @@
         </div>
     </div>
 
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Group Members</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" >
-        <table class="table" >
-            <tbody id="members-table">
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Group Members</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <tbody id="members-table">
 
-            </tbody>
-              <!-- <tr>
+                        </tbody>
+                        <!-- <tr>
              
                 <td>Mark</td>
                 <td>Otto</td>
                 <td>@mdo</td>
               </tr> -->
-            
-          </table>
-      </div>
-    
+
+                    </table>
+                </div>
+
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="./public/js/socket.io.js"></script>
@@ -136,22 +139,46 @@
         // A function that previews the selected file in a specified HTML element.
         function previewFile() {
             const preview = document.getElementById('preview');
-            const file = document.querySelector('input[type=file]').files[0];
-            const reader = new FileReader();
+            const files = document.querySelector('input[type=file]').files;
 
-            reader.addEventListener("load", function () {
-                // Preview image or video
-                if (file.type.startsWith('image')) {
-                    preview.innerHTML = `<img src="${reader.result}" alt="Preview" style="max-width: 100%; max-height: 200px;">`;
-                } else if (file.type.startsWith('video')) {
-                    preview.innerHTML = `<video controls style="max-width: 100%; max-height: 200px;"><source src="${reader.result}" type="${file.type}">Your browser does not support the video tag.</video>`;
+            preview.innerHTML = ''; // Clear previous preview
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileType = file.type.split('/')[0]; // Get the main file type
+
+                if (fileType === 'image') {
+                    const reader = new FileReader();
+
+                    reader.onload = function (event) {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.style.maxWidth = '100%';
+                        preview.appendChild(img);
+                    };
+
+                    reader.readAsDataURL(file);
+                } else if (fileType === 'video') {
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.controls = true;
+                    video.style.maxWidth = '100%';
+                    preview.appendChild(video);
+                } else if (fileType === 'audio') {
+                    const audio = document.createElement('audio');
+                    audio.src = URL.createObjectURL(file);
+                    audio.controls = true;
+                    audio.style.width = '100%';
+                    preview.appendChild(audio);
+                } else {
+                    const p = document.createElement('p');
+                    p.setAttribute("class", "text-success");
+                    p.textContent =   file.name;
+                    preview.appendChild(p);
                 }
-            }, false);
-
-            if (file) {
-                reader.readAsDataURL(file);
             }
         }
+
     </script>
 </body>
 

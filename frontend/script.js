@@ -49,6 +49,16 @@ async function addChat(e) {
     if (!chatVal && !file) {
       return;
     }
+    var maxSizeInBytes = 1024 * 1024; // 1 MB (adjust as needed)
+
+    // Check the file size
+    
+    if (file && file.size > maxSizeInBytes) {
+      mediaInput.value = null;
+      mediaInput.value = '';
+       alert('File size exceeds the limit (1 MB).');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('file', file);
@@ -162,6 +172,28 @@ async function displayChats(chats) {
         div.style.width = '18rem';
 
         div.innerHTML = `<img src="${chat.fileName}" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">${chat.user.name}</h5>
+            <a href="${chat.fileName}" class="btn btn-sm btn-primary">Download</a>
+            <div class="timestamp">${timeString}</div>
+          </div>`;
+        chatContainer.appendChild(div);
+      }
+      if (chat.type === "otherFile") {
+        const div = document.createElement('div');
+        // Set the class attribute with all the classes
+        div.setAttribute("class", "message-container");
+        div.innerHTML = `
+        <div class="message bg-light p-2 mb-2">${chat.user.name}: <a href="${chat.fileName}"> ${chat.fileName} </a></div>
+        <div class="message-time">${timeString}</div>`;
+        chatContainer.appendChild(div);
+
+      }
+      if (chat.type === "video") {
+        const div = document.createElement('div');
+        div.setAttribute("class", "card my-2");
+        div.style.width = '18rem';
+        div.innerHTML = `<video src="${chat.fileName}" class="card-img-top" alt="...">
           <div class="card-body">
             <h5 class="card-title">${chat.user.name}</h5>
             <a href="${chat.fileName}" class="btn btn-sm btn-primary">Download</a>
@@ -401,13 +433,15 @@ async function displayGroupChat(groupId, groupName, sendLocation) {
   localStorage.setItem('groupName', groupName);
   chatContainer.innerHTML = '';
   if (sendLocation !== 'socket') {
-    
+
     localStorage.removeItem('chats');
     localStorage.setItem('groupId', groupId);
-
+    membersTable.innerHTML = '';
     groupNameSpan.innerHTML = groupName;
     const res = await axios.get(baseUrl + `get-all-group-users?groupId=${groupId}`, { headers: { "Authorization": getToken() } })
     console.log(res);
+
+    // DISPLAY USER MEMBERS
     res.data.users.forEach((user, index) => {
       const tr = document.createElement('tr');
       // tr.setAttribute("value", user.id);

@@ -17,14 +17,22 @@ const userAuth = require('./middleware/auth');
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, { cors: {
+    origin: 'http://localhost:5500',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+} });
 
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 // MIDDLEWARE ROUTES
 app.use(morgan('combined', { stream: accessLogStream }));
 app.use(compression());
 app.use(helmet());
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5500',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}))
 app.use(express.json());  
 
 // ROUTES IMPORT
